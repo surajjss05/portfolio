@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", sans-serif;
+
+  --color-navy: #0F172A;
+  --color-dark-purple: #1E1B4B;
+  --color-midnight: #111827;
+  --color-neon-pink: #FF4D8D;
+  --color-purple-accent: #8B5CF6;
+  --color-violet-soft: #A78BFA;
+  --color-card-bg: #1F2937;
+
+  /* Theme Semantic Colors */
+  --color-bg-primary: var(--color-navy);
+  --color-bg-secondary: #111827;
+  --color-text-primary: #E2E8F0;
+  --color-text-secondary: #94A3B8;
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+
+  /* Light Mode Overrides */
+  --color-light-bg: #F8FAFC;
+  --color-light-card: #FFFFFF;
+  --color-light-text: #1E293B;
+  --color-light-muted: #64748B;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-bg-primary text-text-primary font-sans transition-colors duration-300;
+  }
+  
+  .light {
+    --color-bg-primary: #F8FAFC;
+    --color-bg-secondary: #F1F5F9;
+    --color-text-primary: #1E293B;
+    --color-text-secondary: #64748B;
+    --color-border-subtle: rgba(0, 0, 0, 0.1);
+  }
+
+  .light body {
+    @apply bg-bg-primary text-text-primary;
+  }
+}
+
+.glass {
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.light .glass {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(229, 231, 235, 1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-accent to-neon-pink;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.btn-primary {
+  @apply px-8 py-3 rounded-full bg-gradient-to-r from-purple-accent to-neon-pink text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-purple-500/20;
+}
+
+.btn-secondary {
+  @apply px-8 py-3 rounded-full border border-purple-accent/50 text-white font-semibold hover:bg-purple-accent/10 transition-all;
+}
+
+.light .btn-secondary {
+  @apply border-purple-accent/30 text-purple-accent hover:bg-purple-accent/5;
+}
+
+.card {
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  @apply rounded-3xl overflow-hidden transition-all duration-300;
+}
+
+.light .card {
+  @apply bg-white border border-gray-200 shadow-sm;
+}
