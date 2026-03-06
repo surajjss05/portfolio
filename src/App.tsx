@@ -34,12 +34,30 @@ const fadeInUp = {
 
 const staggerContainer = {
   initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  },
   whileInView: {
     transition: {
       staggerChildren: 0.1
     }
   },
   viewport: { once: true, margin: "-100px" }
+};
+
+const heroItemVariants = {
+  initial: { opacity: 0, y: 30, filter: 'blur(10px)' },
+  animate: { 
+    opacity: 1, 
+    y: 0, 
+    filter: 'blur(0px)',
+    transition: { 
+      duration: 1, 
+      ease: [0.22, 1, 0.36, 1] 
+    }
+  }
 };
 
 const itemVariants = {
@@ -175,14 +193,13 @@ const Navbar = ({ theme, toggleTheme }: { theme: string, toggleTheme: () => void
 
 const Hero = () => {
   const [text, setText] = useState('');
-  const fullText = 'Full Stack Web Developer';
+  const fullText = 'Web Developer';
   const [isDeleting, setIsDeleting] = useState(false);
   const [loopNum, setLoopNum] = useState(0);
   const [typingSpeed, setTypingSpeed] = useState(150);
 
   useEffect(() => {
     const handleTyping = () => {
-      const i = loopNum % 1; // Only one string for now, but expandable
       const full = fullText;
       
       setText(isDeleting 
@@ -205,43 +222,44 @@ const Hero = () => {
   }, [text, isDeleting, loopNum, typingSpeed]);
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+    <section id="home" className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#0A0A12]">
       {/* Background Glows */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-purple-accent/20 rounded-full blur-[120px]"></div>
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-neon-pink/20 rounded-full blur-[120px]"></div>
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-purple-accent/10 rounded-full blur-[120px]"></div>
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-neon-pink/10 rounded-full blur-[120px]"></div>
+      
+      {/* Background Code Pattern Overlay */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden font-mono text-[10px] leading-tight">
+        {Array.from({ length: 50 }).map((_, i) => (
+          <div key={i} className="whitespace-nowrap">
+            {`const portfolio = { name: "Suraj", role: "Web Developer", skills: ["React", "Node", "TypeScript"], passion: "Building UIs" }; `.repeat(10)}
+          </div>
+        ))}
+      </div>
 
       <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
         <motion.div
           variants={staggerContainer}
           initial="initial"
-          animate="whileInView"
+          animate="animate"
         >
-          <motion.h2 variants={itemVariants} className="text-xl md:text-2xl font-medium text-purple-accent mb-4">Hi, I'm Suraj</motion.h2>
-          <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl font-bold font-display leading-tight mb-6 min-h-[1.2em]">
-            {text}<span className="animate-pulse text-purple-accent">|</span>
+          <motion.p variants={heroItemVariants} className="text-xl md:text-2xl font-medium text-gray-400 mb-2">Hello, I'm</motion.p>
+          <motion.h1 variants={heroItemVariants} className="text-6xl md:text-8xl font-bold font-display leading-tight text-white mb-2">
+            Suraj
           </motion.h1>
-          <motion.p variants={itemVariants} className="text-lg text-text-secondary mb-8 max-w-lg">
-            Specializing in the MERN Stack and modern web architecture. I build high-performance, user-centric web applications with a focus on clean design and exceptional user experience.
+          <motion.h2 variants={heroItemVariants} className="text-5xl md:text-7xl font-bold font-display leading-tight mb-6 min-h-[1.2em]">
+            <span className="gradient-text">{text}</span>
+            <span className="animate-pulse text-neon-pink">|</span>
+          </motion.h2>
+          <motion.p variants={heroItemVariants} className="text-sm md:text-base tracking-[0.2em] font-bold text-gray-500 mb-10 uppercase">
+            FRONTEND DEVELOPER / C / JAVA / REACT+
           </motion.p>
-          <motion.div variants={itemVariants} className="flex flex-wrap gap-4">
-            <a href="#portfolio" className="btn-primary">My Work</a>
-            <a href="#contact" className="btn-secondary">Hire Me</a>
-            <a 
-              href="#" 
-              download="Suraj_Resume.pdf"
-              className="px-6 py-3 rounded-xl border border-white/10 glass hover:bg-white/10 transition-all flex items-center gap-2"
-              onClick={(e) => {
-                if (e.currentTarget.getAttribute('href') === '#') {
-                  e.preventDefault();
-                  alert('Please provide a valid link to your resume file in the code (App.tsx line 231).');
-                }
-              }}
-            >
-              Download CV <Download size={18} />
-            </a>
+          
+          <motion.div variants={heroItemVariants} className="flex flex-wrap gap-6 mb-12">
+            <a href="#portfolio" className="btn-primary px-10 py-4 rounded-2xl">My Work</a>
+            <a href="#contact" className="px-10 py-4 rounded-2xl border border-purple-accent/30 text-white font-semibold hover:bg-purple-accent/10 transition-all">Hire Me</a>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="flex gap-6 mt-12">
+          <motion.div variants={heroItemVariants} className="flex gap-4">
             {[
               { icon: Github, href: 'https://github.com/surajjss05' },
               { icon: Linkedin, href: 'https://www.linkedin.com/in/suraj-shinde26' },
@@ -253,62 +271,162 @@ const Hero = () => {
                 href={social.href}
                 target="_blank"
                 rel="noreferrer"
-                whileHover={{ y: -5, color: '#8B5CF6' }}
-                className="text-gray-400 transition-colors"
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(139, 92, 246, 0.1)' }}
+                className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-purple-accent transition-all"
               >
-                <social.icon size={24} />
+                <social.icon size={20} />
               </motion.a>
             ))}
           </motion.div>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, ease: 'easeOut' }}
           className="relative hidden md:block"
         >
-          {/* Floating UI Elements */}
+          {/* Code Window */}
           <motion.div 
-            animate={{ y: [0, -20, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            className="glass p-6 rounded-2xl absolute -top-10 -left-10 z-20 shadow-2xl"
+            whileHover={{ y: -5 }}
+            className="glass p-8 rounded-3xl border border-white/10 shadow-2xl bg-[#0D0D1A]/80 backdrop-blur-xl relative z-10"
           >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <div className="flex items-center gap-2 mb-8">
+              <div className="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
+              <div className="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
+              <div className="w-3 h-3 rounded-full bg-[#27C93F]"></div>
             </div>
-            <div className="space-y-2">
-              <div className="h-2 w-32 bg-white/10 rounded"></div>
-              <div className="h-2 w-24 bg-white/10 rounded"></div>
-              <div className="h-2 w-40 bg-purple-accent/30 rounded"></div>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            animate={{ y: [0, 20, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-            className="glass p-6 rounded-2xl absolute -bottom-10 -right-10 z-20 shadow-2xl"
-          >
-            <div className="flex items-center gap-4 mb-2">
-              <div className="p-2 bg-purple-accent/20 rounded-lg text-purple-accent">
-                <Cpu size={20} />
+            
+            <div className="font-mono text-sm md:text-base leading-relaxed">
+              <div className="flex gap-2">
+                <span className="text-purple-accent">const</span>
+                <span className="text-blue-400">developer</span>
+                <span className="text-white">=</span>
+                <span className="text-white">{'{'}</span>
               </div>
-              <span className="text-sm font-semibold">Performance</span>
+              <div className="pl-6 flex gap-2">
+                <span className="text-gray-400 text-opacity-80">name:</span>
+                <span className="text-neon-pink">"Suraj"</span>
+                <span className="text-white">,</span>
+              </div>
+              <div className="pl-6 flex gap-2">
+                <span className="text-gray-400 text-opacity-80">skills:</span>
+                <span className="text-white">[</span>
+                <span className="text-neon-pink">"React"</span>
+                <span className="text-white">,</span>
+                <span className="text-neon-pink">"TypeScript"</span>
+                <span className="text-white">]</span>
+                <span className="text-white">,</span>
+              </div>
+              <div className="pl-6 flex gap-2">
+                <span className="text-gray-400 text-opacity-80">passion:</span>
+                <span className="text-neon-pink">"Building UIs"</span>
+                <span className="text-white">,</span>
+              </div>
+              <div className="pl-6 flex gap-2">
+                <span className="text-gray-400 text-opacity-80">available:</span>
+                <span className="text-blue-400">true</span>
+              </div>
+              <div className="text-white">{'};'}</div>
             </div>
-            <div className="text-2xl font-bold">99%</div>
           </motion.div>
 
-          <div className="relative z-10 rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-            <img 
-              src="https://picsum.photos/seed/coding/800/800" 
-              alt="Developer Workspace" 
-              className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-700"
-              referrerPolicy="no-referrer"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-navy via-transparent to-transparent"></div>
-          </div>
+          {/* Floating Stat Cards */}
+          <motion.div 
+            animate={{ y: [0, -15, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            className="glass p-5 rounded-2xl absolute -bottom-6 -left-10 z-20 shadow-2xl border border-white/10 bg-[#161625]/90 overflow-hidden group"
+          >
+            <div className="absolute inset-0 pointer-events-none">
+              <motion.div 
+                animate={{ 
+                  left: ["-100%", "100%"],
+                }}
+                transition={{ duration: 4, repeat: Infinity, ease: "linear", delay: 1 }}
+                className="absolute bottom-0 h-[2px] w-full bg-gradient-to-r from-transparent via-purple-accent to-transparent"
+              />
+            </div>
+            <div className="relative z-10">
+              <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1">Portfolio</p>
+              <p className="text-xs text-gray-500 mb-1">Projects</p>
+              <div className="flex items-center gap-2">
+                <p className="text-3xl font-bold text-purple-accent">25+</p>
+                <div className="flex -space-x-2">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="w-4 h-4 rounded-full border border-[#161625] bg-purple-accent/20 flex items-center justify-center">
+                      <div className="w-1 h-1 rounded-full bg-purple-accent"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            animate={{ y: [0, 15, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+            className="glass p-5 rounded-2xl absolute -top-10 -right-6 z-20 shadow-2xl border border-white/10 bg-[#161625]/90 overflow-hidden group"
+          >
+            {/* Animated Snake Border */}
+            <div className="absolute inset-0 pointer-events-none">
+              <motion.div 
+                animate={{ 
+                  left: ["-100%", "100%"],
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                className="absolute top-0 h-[2px] w-full bg-gradient-to-r from-transparent via-purple-accent to-transparent"
+              />
+              <motion.div 
+                animate={{ 
+                  top: ["-100%", "100%"],
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear", delay: 1.5 }}
+                className="absolute right-0 w-[2px] h-full bg-gradient-to-b from-transparent via-purple-accent to-transparent"
+              />
+            </div>
+
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400">GitHub Stats</p>
+                <div className="flex gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                  <span className="text-[8px] text-green-500 font-bold uppercase">Live</span>
+                </div>
+              </div>
+              
+              <div className="flex items-end gap-3 mb-4">
+                <div>
+                  <p className="text-xs text-gray-500">Commits</p>
+                  <p className="text-3xl font-bold text-white">12</p>
+                </div>
+                <div className="pb-1">
+                  <p className="text-[10px] text-purple-accent font-bold">+4 today</p>
+                </div>
+              </div>
+
+              {/* Mini Contribution Grid with "Snake" Animation */}
+              <div className="relative grid grid-cols-7 gap-1">
+                {Array.from({ length: 14 }).map((_, i) => (
+                  <div 
+                    key={i}
+                    className={`w-3 h-3 rounded-sm ${i < 8 ? 'bg-purple-accent/20' : 'bg-[#1e1e2e]'}`}
+                  />
+                ))}
+                {/* The Snake */}
+                <motion.div 
+                  animate={{ 
+                    x: [0, 16, 32, 48, 64, 80, 96, 96, 80, 64, 48, 32, 16, 0, 0],
+                    y: [0, 0, 0, 0, 0, 0, 0, 16, 16, 16, 16, 16, 16, 16, 0]
+                  }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                  className="absolute top-0 left-0 w-3 h-3 bg-purple-accent rounded-sm shadow-[0_0_10px_#8B5CF6]"
+                />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Background Decorative Image/Pattern */}
+          <div className="absolute -inset-10 bg-gradient-to-tr from-purple-accent/10 to-neon-pink/10 blur-3xl -z-10 rounded-full"></div>
         </motion.div>
       </div>
     </section>
@@ -336,6 +454,7 @@ const About = ({ theme }: { theme: string }) => {
                 alt="Suraj" 
                 className="w-full h-full object-cover rounded-2xl grayscale hover:grayscale-0 transition-all duration-700"
                 referrerPolicy="no-referrer"
+                loading="lazy"
               />
             </div>
             <div className="absolute -bottom-6 -right-6 glass p-6 rounded-2xl">
@@ -358,7 +477,7 @@ const About = ({ theme }: { theme: string }) => {
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <h4 className="font-bold mb-2">Education</h4>
-                <p className="text-sm text-text-secondary">Web Development (BCA)</p>
+                <p className="text-sm text-text-secondary">BCA</p>
               </div>
               <div>
                 <h4 className="font-bold mb-2">Experience</h4>
@@ -393,8 +512,8 @@ const About = ({ theme }: { theme: string }) => {
             </a>
           </div>
           
-          <div className="flex justify-center overflow-x-auto py-4 no-scrollbar">
-            <div className="min-w-[800px] md:min-w-0">
+          <div className="flex justify-center overflow-x-auto py-4 no-scrollbar relative">
+            <div className="min-w-[800px] md:min-w-0 relative">
               <GitHubCalendar 
                 username="surajjss05" 
                 colorScheme={theme === 'dark' ? 'dark' : 'light'}
@@ -412,6 +531,17 @@ const About = ({ theme }: { theme: string }) => {
                   })
                 }
               />
+              {/* The "Running Snake" Animation Overlay */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden mt-1 ml-1">
+                <motion.div 
+                  animate={{ 
+                    x: [0, 800, 800, 0, 0, 800, 800, 0, 0, 800, 800, 0, 0],
+                    y: [0, 0, 16, 16, 32, 32, 48, 48, 64, 64, 80, 80, 0]
+                  }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                  className="w-3 h-3 bg-purple-accent rounded-sm shadow-[0_0_15px_#8B5CF6] z-10"
+                />
+              </div>
               <ReactTooltip id="github-tooltip" />
             </div>
           </div>
@@ -513,30 +643,30 @@ const Projects = () => {
   
   const projects = [
     {
-      title: 'E-Commerce Dashboard',
-      desc: 'A full-featured admin panel for managing products, orders, and analytics.',
-      longDesc: 'This project is a comprehensive dashboard designed for e-commerce administrators. It features real-time sales tracking, inventory management, and customer behavior analytics. Built with a focus on performance and scalability, it uses advanced data visualization to help business owners make informed decisions.',
-      image: 'https://picsum.photos/seed/dash/800/500',
-      tags: ['React', 'Tailwind', 'Recharts'],
-      category: 'Full-stack',
+      title: 'Student Grade Calculator',
+      desc: 'An interactive web application to calculate and manage student grades with a clean, intuitive interface. Features include grade calculation, average tracking, and performance visualization.',
+      longDesc: 'The Student Grade Calculator is designed to help students and teachers easily track academic performance. Built with vanilla JavaScript, it provides a seamless experience for inputting marks and receiving instant feedback on grades and percentages.',
+      image: 'https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?auto=format&fit=crop&q=80&w=800',
+      tags: ['HTML', 'CSS', 'JavaScript'],
+      category: 'Frontend',
       github: 'https://github.com/surajjss05',
       live: 'https://ais-dev-6xtvmrqbtwma6opreghrhu-362840097352.asia-southeast1.run.app'
     },
     {
-      title: 'AI Image Generator',
-      desc: 'Web app that uses Gemini API to generate creative image descriptions and mockups.',
-      longDesc: 'An innovative application that bridges the gap between text and visual creativity. By leveraging the Gemini API, users can generate detailed prompts and conceptual mockups. The app features a clean, intuitive interface and a history of generated content, making it a valuable tool for designers and content creators.',
-      image: 'https://picsum.photos/seed/ai/800/500',
-      tags: ['React', 'Gemini API', 'Node.js'],
-      category: 'AI',
+      title: 'Python Mini Projects Collection',
+      desc: 'A comprehensive collection of useful Python utilities including Water Reminder app, Password Generator, and more. Each project demonstrates core Python concepts and practical automation.',
+      longDesc: 'This collection showcases a variety of Python-based tools designed for everyday utility. From desktop notifications for hydration to secure password generation, these projects highlight the versatility of Python for automation and GUI development using Tkinter.',
+      image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
+      tags: ['Python', 'Tkinter', 'Automation'],
+      category: 'Python',
       github: 'https://github.com/surajjss05',
       live: 'https://ais-dev-6xtvmrqbtwma6opreghrhu-362840097352.asia-southeast1.run.app'
     },
     {
-      title: 'Portfolio v1',
-      desc: 'My previous portfolio built with pure HTML/CSS and minimal JS.',
-      longDesc: 'My first step into the professional web development world. This portfolio showcases my early skills in semantic HTML, responsive CSS layouts, and basic JavaScript interactivity. It served as a foundation for my current expertise and demonstrates my growth as a developer over time.',
-      image: 'https://picsum.photos/seed/port/800/500',
+      title: 'Car Racing Game',
+      desc: 'An exciting browser-based car racing game built with vanilla JavaScript. Features smooth animations, collision detection, and an increasing difficulty curve to keep players engaged.',
+      longDesc: 'Experience the thrill of the track with this JavaScript-powered racing game. It utilizes the Canvas API for high-performance rendering and features responsive controls, making it playable on both desktop and mobile browsers.',
+      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=800',
       tags: ['HTML', 'CSS', 'JavaScript'],
       category: 'Frontend',
       github: 'https://github.com/surajjss05',
@@ -544,7 +674,7 @@ const Projects = () => {
     }
   ];
 
-  const categories = ['All', 'Frontend', 'Full-stack', 'AI'];
+  const categories = ['All', 'Frontend', 'Python'];
   const filteredProjects = filter === 'All' ? projects : projects.filter(p => p.category === filter || p.tags.includes(filter));
 
   return (
@@ -556,17 +686,22 @@ const Projects = () => {
         viewport={{ once: true, margin: "-100px" }}
         className="max-w-7xl mx-auto px-6"
       >
-        <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-          <div>
-            <h2 className="text-4xl font-bold font-display mb-4">Featured <span className="gradient-text">Projects</span></h2>
-            <p className="text-text-secondary">A selection of my recent work and personal experiments.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+        <div className="text-center mb-16">
+          <motion.h2 variants={itemVariants} className="text-5xl font-bold font-display mb-4">
+            My <span className="gradient-text">Projects</span>
+          </motion.h2>
+          <motion.p variants={itemVariants} className="text-text-secondary max-w-2xl mx-auto">
+            A selection of my recent work and personal experiments.
+          </motion.p>
+        </div>
+
+        <motion.div variants={itemVariants} className="flex justify-center mb-12 px-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full sm:w-auto">
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${filter === cat ? 'bg-purple-accent text-white' : 'glass text-gray-400 hover:text-white'}`}
+                className={`px-8 py-3 sm:px-6 sm:py-2 rounded-2xl sm:rounded-full text-sm font-bold transition-all min-h-[48px] sm:min-h-0 flex items-center justify-center ${filter === cat ? 'bg-purple-accent text-white shadow-lg shadow-purple-accent/20' : 'glass text-gray-400 hover:text-white hover:bg-white/5'}`}
               >
                 {cat}
               </button>
@@ -576,24 +711,28 @@ const Projects = () => {
 
         <motion.div 
           layout
-          className="grid md:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          <AnimatePresence mode='popLayout'>
-            {filteredProjects.map((project, i) => (
+          <AnimatePresence mode="popLayout">
+            {filteredProjects.map((project) => (
               <motion.div
                 key={project.title}
                 layout
-                variants={itemVariants}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                transition={{ duration: 0.4 }}
                 whileHover={{ y: -10 }}
                 onClick={() => setSelectedProject(project)}
-                className="glass rounded-3xl overflow-hidden group cursor-pointer"
+                className="glass rounded-3xl overflow-hidden group cursor-pointer flex flex-col"
               >
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-56 overflow-hidden">
                 <img 
                   src={project.image} 
                   alt={project.title} 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-navy/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                   <div className="p-3 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all">
@@ -601,20 +740,28 @@ const Projects = () => {
                   </div>
                 </div>
               </div>
-              <div className="p-6">
-                <div className="flex gap-2 mb-4">
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="text-2xl font-bold mb-3">{project.title}</h3>
+                <p className="text-text-secondary text-sm mb-6 line-clamp-3">{project.desc}</p>
+                
+                <div className="flex flex-wrap gap-2 mb-8">
                   {project.tags.map(tag => (
-                    <span key={tag} className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 bg-purple-accent/10 text-purple-accent rounded">
+                    <span key={tag} className="text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 bg-purple-accent/10 text-purple-accent rounded-lg">
                       {tag}
                     </span>
                   ))}
                 </div>
-                <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-                <p className="text-text-secondary text-sm mb-6">{project.desc}</p>
-                <div className="flex gap-4">
-                  <span className="text-sm font-semibold flex items-center gap-1 text-purple-accent">
-                    View Details <ChevronRight size={14} />
-                  </span>
+
+                <div className="mt-auto">
+                  <a 
+                    href={project.github} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="w-full py-3 rounded-xl border border-purple-accent/30 flex items-center justify-center gap-2 text-sm font-medium hover:bg-purple-accent/10 transition-all"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Github size={18} /> GitHub
+                  </a>
                 </div>
               </div>
             </motion.div>
@@ -708,7 +855,7 @@ const Resume = () => {
     },
     {
       year: '2025 - 2027',
-      title: 'BCA [ Web Development & Computer Applications ]',
+      title: 'BCA',
       company: 'Savitribai Phule Pune University',
       desc: 'College: NACAS AHILYANAGAR. Focused on modern web technologies, full-stack development, and core CS fundamentals.'
     },
@@ -749,25 +896,42 @@ const Resume = () => {
             </div>
           </div>
 
-          <motion.div variants={itemVariants} className="flex flex-col justify-center items-center glass p-12 rounded-3xl text-center">
-            <div className="p-6 bg-purple-accent/10 rounded-full text-purple-accent mb-6">
-              <Download size={48} />
+          <motion.div variants={itemVariants} className="flex flex-col justify-center items-center glass p-8 md:p-12 rounded-3xl text-center relative overflow-hidden group">
+            {/* Subtle Resume Preview Background */}
+            <div className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none">
+              <img 
+                src="https://i.ibb.co/3Q5mT62/IMG-20260225-224506.jpg" 
+                alt="Resume Background" 
+                className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
+                referrerPolicy="no-referrer"
+              />
             </div>
-            <h3 className="text-2xl font-bold mb-4">Ready to see more?</h3>
-            <p className="text-text-secondary mb-8">Download my full resume to see my complete experience, certifications, and achievements.</p>
-            <a 
-              href="#" 
-              download="Suraj_Resume.pdf"
-              className="btn-primary flex items-center gap-2"
-              onClick={(e) => {
-                if (e.currentTarget.getAttribute('href') === '#') {
-                  e.preventDefault();
-                  alert('Please provide a valid link to your resume file in the code (App.tsx line 746).');
-                }
-              }}
-            >
-              Download Resume <Download size={18} />
-            </a>
+
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="p-6 bg-purple-accent/10 rounded-full text-purple-accent mb-6 ring-4 ring-purple-accent/5">
+                <Download size={48} className="animate-bounce" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Curriculum Vitae</h3>
+              <p className="text-text-secondary mb-8 max-w-sm">
+                Click below to view or download my professional resume. It contains detailed information about my technical skills and project experience.
+              </p>
+              
+              <div className="relative group/btn">
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-accent to-neon-pink rounded-2xl blur opacity-25 group-hover/btn:opacity-75 transition duration-1000 group-hover/btn:duration-200"></div>
+                <a 
+                  href="https://ibb.co/fV2sm2YB" 
+                  target="_blank"
+                  rel="noreferrer"
+                  className="relative btn-primary flex items-center gap-2 px-12 py-4 rounded-2xl"
+                >
+                  Download Resume <Download size={18} />
+                </a>
+              </div>
+              
+              <p className="mt-6 text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                PDF / JPG Format Available
+              </p>
+            </div>
           </motion.div>
         </div>
       </motion.div>
