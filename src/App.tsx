@@ -69,6 +69,25 @@ const itemVariants = {
   }
 };
 
+const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string, callback?: () => void) => {
+  e.preventDefault();
+  const targetId = href.replace('#', '');
+  const elem = document.getElementById(targetId);
+  if (elem) {
+    const offset = 80; // Navbar height offset
+    const bodyRect = document.body.getBoundingClientRect().top;
+    const elemRect = elem.getBoundingClientRect().top;
+    const elemPosition = elemRect - bodyRect;
+    const offsetPosition = elemPosition - offset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
+  if (callback) callback();
+};
+
 const Navbar = ({ theme, toggleTheme }: { theme: string, toggleTheme: () => void }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -85,6 +104,10 @@ const Navbar = ({ theme, toggleTheme }: { theme: string, toggleTheme: () => void
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const scrollToSectionLocal = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    scrollToSection(e, href, () => setIsMobileMenuOpen(false));
+  };
 
   const navLinks = [
     { name: 'Home', href: '#home' },
@@ -116,14 +139,16 @@ const Navbar = ({ theme, toggleTheme }: { theme: string, toggleTheme: () => void
       className="fixed top-0 w-full z-50 border-b border-transparent transition-colors duration-500"
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        <motion.div 
+        <motion.a 
+          href="#home"
+          onClick={(e) => scrollToSection(e, '#home')}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 text-2xl font-bold font-display"
+          className="flex items-center gap-2 text-2xl font-bold font-display cursor-pointer"
         >
           <span className="text-purple-accent">&lt;/&gt;</span>
           <span className="gradient-text">Suraj</span>
-        </motion.div>
+        </motion.a>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8">
@@ -131,6 +156,7 @@ const Navbar = ({ theme, toggleTheme }: { theme: string, toggleTheme: () => void
             <motion.a
               key={link.name}
               href={link.href}
+              onClick={(e) => scrollToSectionLocal(e, link.href)}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
@@ -177,7 +203,7 @@ const Navbar = ({ theme, toggleTheme }: { theme: string, toggleTheme: () => void
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => scrollToSectionLocal(e, link.href)}
                   className="text-lg font-medium hover:text-purple-accent transition-colors"
                 >
                   {link.name}
@@ -255,8 +281,8 @@ const Hero = () => {
           </motion.p>
           
           <motion.div variants={heroItemVariants} className="flex flex-wrap gap-6 mb-12">
-            <a href="#portfolio" className="btn-primary px-10 py-4 rounded-2xl">My Work</a>
-            <a href="#contact" className="px-10 py-4 rounded-2xl border border-purple-accent/30 text-white font-semibold hover:bg-purple-accent/10 transition-all">Hire Me</a>
+            <a href="#portfolio" onClick={(e) => scrollToSection(e, '#portfolio')} className="btn-primary px-10 py-4 rounded-2xl">My Work</a>
+            <a href="#contact" onClick={(e) => scrollToSection(e, '#contact')} className="px-10 py-4 rounded-2xl border border-purple-accent/30 text-white font-semibold hover:bg-purple-accent/10 transition-all">Hire Me</a>
           </motion.div>
 
           <motion.div variants={heroItemVariants} className="flex gap-4">
@@ -646,30 +672,30 @@ const Projects = () => {
       title: 'Student Grade Calculator',
       desc: 'An interactive web application to calculate and manage student grades with a clean, intuitive interface. Features include grade calculation, average tracking, and performance visualization.',
       longDesc: 'The Student Grade Calculator is designed to help students and teachers easily track academic performance. Built with vanilla JavaScript, it provides a seamless experience for inputting marks and receiving instant feedback on grades and percentages.',
-      image: 'https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?auto=format&fit=crop&q=80&w=800',
+      image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f',
       tags: ['HTML', 'CSS', 'JavaScript'],
       category: 'Frontend',
-      github: 'https://github.com/surajjss05',
+      github: 'https://github.com/surajjss05/student-grade-calculator',
       live: 'https://ais-dev-6xtvmrqbtwma6opreghrhu-362840097352.asia-southeast1.run.app'
     },
     {
       title: 'Python Mini Projects Collection',
       desc: 'A comprehensive collection of useful Python utilities including Water Reminder app, Password Generator, and more. Each project demonstrates core Python concepts and practical automation.',
       longDesc: 'This collection showcases a variety of Python-based tools designed for everyday utility. From desktop notifications for hydration to secure password generation, these projects highlight the versatility of Python for automation and GUI development using Tkinter.',
-      image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
+      image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c',
       tags: ['Python', 'Tkinter', 'Automation'],
       category: 'Python',
-      github: 'https://github.com/surajjss05',
+      github: 'https://github.com/surajjss05/python-mini-project-s-',
       live: 'https://ais-dev-6xtvmrqbtwma6opreghrhu-362840097352.asia-southeast1.run.app'
     },
     {
-      title: 'Car Racing Game',
+      title: 'Car Rush Arcade',
       desc: 'An exciting browser-based car racing game built with vanilla JavaScript. Features smooth animations, collision detection, and an increasing difficulty curve to keep players engaged.',
       longDesc: 'Experience the thrill of the track with this JavaScript-powered racing game. It utilizes the Canvas API for high-performance rendering and features responsive controls, making it playable on both desktop and mobile browsers.',
-      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=800',
+      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420',
       tags: ['HTML', 'CSS', 'JavaScript'],
       category: 'Frontend',
-      github: 'https://github.com/surajjss05',
+      github: 'https://github.com/surajjss05/car-rush-arcade',
       live: 'https://ais-dev-6xtvmrqbtwma6opreghrhu-362840097352.asia-southeast1.run.app'
     }
   ];
@@ -728,7 +754,7 @@ const Projects = () => {
               >
               <div className="relative h-56 overflow-hidden">
                 <img 
-                  src={project.image} 
+                  src={project.image.includes('unsplash') ? `${project.image}?auto=format&fit=crop&w=600&q=75` : project.image} 
                   alt={project.title} 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   referrerPolicy="no-referrer"
@@ -797,10 +823,11 @@ const Projects = () => {
               
               <div className="h-64 md:h-80 w-full overflow-hidden">
                 <img 
-                  src={selectedProject.image} 
+                  src={selectedProject.image.includes('unsplash') ? `${selectedProject.image}?auto=format&fit=crop&w=1200&q=85` : selectedProject.image} 
                   alt={selectedProject.title} 
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
               </div>
               
@@ -904,6 +931,7 @@ const Resume = () => {
                 alt="Resume Background" 
                 className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700"
                 referrerPolicy="no-referrer"
+                loading="lazy"
               />
             </div>
 
