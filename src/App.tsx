@@ -676,7 +676,7 @@ const Projects = () => {
       tags: ['HTML', 'CSS', 'JavaScript'],
       category: 'Frontend',
       github: 'https://github.com/surajjss05/student-grade-calculator',
-      live: 'https://ais-dev-6xtvmrqbtwma6opreghrhu-362840097352.asia-southeast1.run.app'
+      live: 'https://gradecalculat.netlify.app/'
     },
     {
       title: 'Python Mini Projects Collection',
@@ -696,7 +696,7 @@ const Projects = () => {
       tags: ['HTML', 'CSS', 'JavaScript'],
       category: 'Frontend',
       github: 'https://github.com/surajjss05/car-rush-arcade',
-      live: 'https://ais-dev-6xtvmrqbtwma6opreghrhu-362840097352.asia-southeast1.run.app'
+      live: 'https://carrushed.netlify.app/'
     }
   ];
 
