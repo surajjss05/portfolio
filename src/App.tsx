@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'motion/react';
 import { GitHubCalendar } from 'react-github-calendar';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
@@ -25,26 +25,140 @@ import {
 
 // --- Components ---
 
+const CustomCursor = () => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'BUTTON' || 
+        target.tagName === 'A' || 
+        target.closest('button') || 
+        target.closest('a') ||
+        target.classList.contains('cursor-pointer')
+      ) {
+        setIsHovering(true);
+      } else {
+        setIsHovering(false);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseover', handleMouseOver);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseover', handleMouseOver);
+    };
+  }, []);
+
+  return (
+    <div className={`hidden lg:block ${isHovering ? 'cursor-active' : ''}`}>
+      <div 
+        className="custom-cursor"
+        style={{ 
+          left: `${mousePos.x}px`, 
+          top: `${mousePos.y}px`,
+          transform: `translate(-50%, -50%) ${isHovering ? 'scale(1.5)' : 'scale(1)'}`
+        }}
+      />
+      <div 
+        className="custom-cursor-ring"
+        style={{ 
+          left: `${mousePos.x}px`, 
+          top: `${mousePos.y}px`,
+          transform: `translate(-50%, -50%) ${isHovering ? 'scale(1.2)' : 'scale(1)'}`
+        }}
+      />
+    </div>
+  );
+};
+
+const ScrollProgress = () => {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  return <motion.div className="scroll-progress" style={{ scaleX }} />;
+};
+
+const Background = ({ theme }: { theme: string }) => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ 
+        x: (e.clientX / window.innerWidth) - 0.5, 
+        y: (e.clientY / window.innerHeight) - 0.5 
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+      {/* Grid Pattern */}
+      <div 
+        className={`absolute inset-0 opacity-[0.15] ${theme === 'dark' ? 'invert-0' : 'invert'}`}
+        style={{ 
+          backgroundImage: `radial-gradient(circle at 2px 2px, ${theme === 'dark' ? 'rgba(139, 92, 246, 0.3)' : 'rgba(0, 0, 0, 0.1)'} 1px, transparent 0)`,
+          backgroundSize: '40px 40px',
+          transform: `translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)`
+        }}
+      />
+      
+      {/* Animated Blobs */}
+      <motion.div 
+        animate={{ 
+          x: mousePos.x * 50,
+          y: mousePos.y * 50,
+        }}
+        className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-accent/10 rounded-full blur-[120px]"
+      />
+      <motion.div 
+        animate={{ 
+          x: mousePos.x * -50,
+          y: mousePos.y * -50,
+        }}
+        className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neon-pink/10 rounded-full blur-[120px]"
+      />
+    </div>
+  );
+};
+
 const fadeInUp = {
-  initial: { opacity: 0, y: 40 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, y: 40, filter: 'blur(10px)' },
+  whileInView: { 
+    opacity: 1, 
+    y: 0, 
+    filter: 'blur(0px)'
+  },
   viewport: { once: true, margin: "-100px" },
-  transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+  transition: { duration: 1, ease: [0.22, 1, 0.36, 1] }
 };
 
 const staggerContainer = {
   initial: {},
   animate: {
     transition: {
-      staggerChildren: 0.1
+      staggerChildren: 0.12
     }
   },
   whileInView: {
     transition: {
-      staggerChildren: 0.1
+      staggerChildren: 0.12
     }
   },
-  viewport: { once: true, margin: "-100px" }
+  viewport: { once: true, margin: "-50px" }
 };
 
 const heroItemVariants = {
@@ -61,11 +175,12 @@ const heroItemVariants = {
 };
 
 const itemVariants = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 30, filter: 'blur(8px)' },
   whileInView: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 0.5 }
+    filter: 'blur(0px)',
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
   }
 };
 
@@ -217,25 +332,27 @@ const Navbar = ({ theme, toggleTheme }: { theme: string, toggleTheme: () => void
   );
 };
 
+const toRotate = ['Web Developer', 'A Freelancer'];
+
 const Hero = () => {
   const [text, setText] = useState('');
-  const fullText = 'Web Developer';
   const [isDeleting, setIsDeleting] = useState(false);
   const [loopNum, setLoopNum] = useState(0);
   const [typingSpeed, setTypingSpeed] = useState(150);
 
   useEffect(() => {
     const handleTyping = () => {
-      const full = fullText;
+      const i = loopNum % toRotate.length;
+      const fullText = toRotate[i];
       
       setText(isDeleting 
-        ? full.substring(0, text.length - 1) 
-        : full.substring(0, text.length + 1)
+        ? fullText.substring(0, text.length - 1) 
+        : fullText.substring(0, text.length + 1)
       );
 
       setTypingSpeed(isDeleting ? 100 : 150);
 
-      if (!isDeleting && text === full) {
+      if (!isDeleting && text === fullText) {
         setTimeout(() => setIsDeleting(true), 2000);
       } else if (isDeleting && text === '') {
         setIsDeleting(false);
@@ -257,7 +374,7 @@ const Hero = () => {
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden font-mono text-[10px] leading-tight">
         {Array.from({ length: 50 }).map((_, i) => (
           <div key={i} className="whitespace-nowrap">
-            {`const portfolio = { name: "Suraj", role: "Web Developer", skills: ["React", "Node", "TypeScript"], passion: "Building UIs" }; `.repeat(10)}
+            {`const portfolio = { name: "Suraj", role: "Freelancer", skills: ["React", "Node", "TypeScript"], passion: "Building UIs" }; `.repeat(10)}
           </div>
         ))}
       </div>
@@ -472,20 +589,25 @@ const About = ({ theme }: { theme: string }) => {
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div
             variants={itemVariants}
-            className="relative"
+            className="relative group"
           >
-            <div className="aspect-square rounded-3xl overflow-hidden border-2 border-purple-accent/30 p-4">
+            {/* Decorative Frames */}
+            <div className="absolute -inset-4 border border-purple-accent/10 rounded-[2.5rem] -z-10 group-hover:scale-105 transition-transform duration-700"></div>
+            <div className="absolute -inset-2 border border-purple-accent/20 rounded-[2rem] -z-10 group-hover:scale-102 transition-transform duration-500"></div>
+            
+            <div className="aspect-square rounded-3xl overflow-hidden border-2 border-purple-accent/30 p-4 bg-midnight/40 backdrop-blur-sm relative z-0">
               <img 
-                src="https://i.ibb.co/YB1M8GWG/IMG-20251201-222015.jpg" 
+                src="https://i.ibb.co/N66W2ZBD/IMG-20260307-WA0044.jpg" 
                 alt="Suraj" 
-                className="w-full h-full object-cover rounded-2xl grayscale hover:grayscale-0 transition-all duration-700"
+                className="w-full h-full object-cover rounded-2xl grayscale hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
                 referrerPolicy="no-referrer"
                 loading="lazy"
               />
             </div>
-            <div className="absolute -bottom-6 -right-6 glass p-6 rounded-2xl">
+            
+            <div className="absolute -bottom-6 -right-6 glass p-6 rounded-2xl border border-white/10 shadow-2xl group-hover:-translate-y-2 transition-transform duration-500">
               <div className="text-3xl font-bold text-purple-accent">WEB</div>
-              <div className="text-sm text-text-secondary">DEVELOPER</div>
+              <div className="text-sm text-text-secondary tracking-widest">DEVELOPER</div>
             </div>
           </motion.div>
 
@@ -619,44 +741,141 @@ const Skills = ({ theme }: { theme: string }) => {
         className="max-w-7xl mx-auto px-6"
       >
         <motion.div variants={itemVariants} className="text-center mb-16">
-          <h2 className="text-4xl font-bold font-display mb-4">Technical <span className="gradient-text">Skills</span></h2>
-          <p className="text-text-secondary max-w-2xl mx-auto">My technical toolkit covers everything from low-level programming to modern frontend frameworks.</p>
+          <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">Technical <span className="gradient-text">Skills</span></h2>
+          <p className="text-text-secondary max-w-2xl mx-auto px-4 md:px-0">My technical toolkit covers everything from low-level programming to modern frontend frameworks.</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {skillCategories.map((cat, i) => (
-            <motion.div
-              key={cat.title}
-              variants={itemVariants}
-              className="glass p-8 rounded-3xl hover:border-purple-accent/30 transition-all"
-            >
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 bg-purple-accent/20 rounded-xl text-purple-accent">
-                  <cat.icon size={24} />
-                </div>
-                <h3 className="text-xl font-bold">{cat.title}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Main Category 1: Frontend */}
+          <motion.div
+            variants={itemVariants}
+            className="md:col-span-2 glass p-8 rounded-3xl hover:border-purple-accent/30 transition-all group relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Globe size={120} />
+            </div>
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 bg-purple-accent/20 rounded-xl text-purple-accent">
+                <Globe size={24} />
               </div>
-              <div className="space-y-6">
-                {cat.skills.map((skill) => (
-                  <div key={skill.name}>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium">{skill.name}</span>
-                      <span className="text-xs text-text-secondary">{skill.level}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-purple-accent/10 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${skill.level}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                        className="h-full bg-gradient-to-r from-purple-accent to-neon-pink"
-                      ></motion.div>
-                    </div>
+              <h3 className="text-2xl font-bold">Frontend Development</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              {[
+                { name: 'HTML5', level: 95 },
+                { name: 'CSS3/Tailwind', level: 90 },
+                { name: 'JavaScript', level: 85 },
+                { name: 'React.js', level: 80 },
+              ].map((skill) => (
+                <div key={skill.name}>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium">{skill.name}</span>
+                    <span className="text-xs text-text-secondary">{skill.level}%</span>
                   </div>
-                ))}
+                  <div className="h-1.5 w-full bg-purple-accent/10 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${skill.level}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                      className="h-full bg-gradient-to-r from-purple-accent to-neon-pink"
+                    ></motion.div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Main Category 2: Programming */}
+          <motion.div
+            variants={itemVariants}
+            className="md:col-span-2 glass p-8 rounded-3xl hover:border-purple-accent/30 transition-all group relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Terminal size={120} />
+            </div>
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 bg-purple-accent/20 rounded-xl text-purple-accent">
+                <Terminal size={24} />
               </div>
-            </motion.div>
-          ))}
+              <h3 className="text-2xl font-bold">Programming Languages</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              {[
+                { name: 'C Language', level: 85 },
+                { name: 'Java', level: 80 },
+                { name: 'Python', level: 70 },
+                { name: 'TypeScript', level: 75 },
+              ].map((skill) => (
+                <div key={skill.name}>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium">{skill.name}</span>
+                    <span className="text-xs text-text-secondary">{skill.level}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-purple-accent/10 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${skill.level}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                      className="h-full bg-gradient-to-r from-purple-accent to-neon-pink"
+                    ></motion.div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Small Category 1: Tools */}
+          <motion.div
+            variants={itemVariants}
+            className="md:col-span-1 glass p-6 rounded-3xl hover:border-purple-accent/30 transition-all"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-purple-accent/20 rounded-lg text-purple-accent">
+                <Cpu size={20} />
+              </div>
+              <h3 className="font-bold">Tools</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {['Git', 'GitHub', 'VS Code', 'Vite', 'Postman'].map(tool => (
+                <span key={tool} className="px-3 py-1 bg-white/5 rounded-lg text-xs font-medium border border-white/5">{tool}</span>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Small Category 2: Backend */}
+          <motion.div
+            variants={itemVariants}
+            className="md:col-span-1 glass p-6 rounded-3xl hover:border-purple-accent/30 transition-all"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-purple-accent/20 rounded-lg text-purple-accent">
+                <Database size={20} />
+              </div>
+              <h3 className="font-bold">Backend</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {['Node.js', 'Express', 'MongoDB', 'SQL'].map(tech => (
+                <span key={tech} className="px-3 py-1 bg-white/5 rounded-lg text-xs font-medium border border-white/5">{tech}</span>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Highlight Card: Learning */}
+          <motion.div
+            variants={itemVariants}
+            className="md:col-span-2 glass p-6 rounded-3xl bg-gradient-to-br from-purple-accent/10 to-transparent border-purple-accent/20 flex items-center justify-between group"
+          >
+            <div>
+              <h3 className="text-lg font-bold mb-1">Currently Learning</h3>
+              <p className="text-sm text-text-secondary">Next.js & Advanced System Design</p>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-purple-accent flex items-center justify-center text-white group-hover:rotate-12 transition-transform">
+              <Code size={24} />
+            </div>
+          </motion.div>
+
         </div>
       </motion.div>
     </section>
@@ -670,8 +889,9 @@ const Projects = () => {
   const projects = [
     {
       title: 'Student Grade Calculator',
-      desc: 'An interactive web application to calculate and manage student grades with a clean, intuitive interface. Features include grade calculation, average tracking, and performance visualization.',
+      desc: 'An interactive web application to calculate and manage student grades with a clean, intuitive interface.',
       longDesc: 'The Student Grade Calculator is designed to help students and teachers easily track academic performance. Built with vanilla JavaScript, it provides a seamless experience for inputting marks and receiving instant feedback on grades and percentages.',
+      lessons: 'Mastered DOM manipulation and state management in vanilla JS. Learned how to handle edge cases in mathematical calculations within the browser.',
       image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f',
       tags: ['HTML', 'CSS', 'JavaScript'],
       category: 'Frontend',
@@ -680,8 +900,9 @@ const Projects = () => {
     },
     {
       title: 'Python Mini Projects Collection',
-      desc: 'A comprehensive collection of useful Python utilities including Water Reminder app, Password Generator, and more. Each project demonstrates core Python concepts and practical automation.',
+      desc: 'A comprehensive collection of useful Python utilities including Water Reminder app, Password Generator, and more.',
       longDesc: 'This collection showcases a variety of Python-based tools designed for everyday utility. From desktop notifications for hydration to secure password generation, these projects highlight the versatility of Python for automation and GUI development using Tkinter.',
+      lessons: 'Deepened understanding of Python libraries like Tkinter and time. Learned how to package Python scripts for desktop use.',
       image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c',
       tags: ['Python', 'Tkinter', 'Automation'],
       category: 'Python',
@@ -690,8 +911,9 @@ const Projects = () => {
     },
     {
       title: 'Car Rush Arcade',
-      desc: 'An exciting browser-based car racing game built with vanilla JavaScript. Features smooth animations, collision detection, and an increasing difficulty curve to keep players engaged.',
+      desc: 'An exciting browser-based car racing game built with vanilla JavaScript. Features smooth animations and collision detection.',
       longDesc: 'Experience the thrill of the track with this JavaScript-powered racing game. It utilizes the Canvas API for high-performance rendering and features responsive controls, making it playable on both desktop and mobile browsers.',
+      lessons: 'Gained expertise in the HTML5 Canvas API and game loop logic. Improved skills in collision detection algorithms and performance optimization.',
       image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420',
       tags: ['HTML', 'CSS', 'JavaScript'],
       category: 'Frontend',
@@ -841,9 +1063,20 @@ const Projects = () => {
                 </div>
                 
                 <h3 className="text-3xl font-bold mb-4">{selectedProject.title}</h3>
-                <p className="text-text-secondary text-lg leading-relaxed mb-8">
-                  {selectedProject.longDesc}
-                </p>
+                
+                <div className="mb-8">
+                  <h4 className="text-sm font-bold uppercase tracking-widest text-purple-accent mb-3">Description</h4>
+                  <p className="text-text-secondary text-lg leading-relaxed">
+                    {selectedProject.longDesc}
+                  </p>
+                </div>
+
+                <div className="mb-8 p-6 bg-purple-accent/5 rounded-2xl border border-purple-accent/10">
+                  <h4 className="text-sm font-bold uppercase tracking-widest text-purple-accent mb-3">Lessons Learned</h4>
+                  <p className="text-text-secondary italic">
+                    "{selectedProject.lessons}"
+                  </p>
+                </div>
                 
                 <div className="flex flex-wrap gap-4">
                   <a 
@@ -881,15 +1114,15 @@ const Resume = () => {
       desc: 'Building responsive websites and web applications for various clients.'
     },
     {
-      year: '2025 - 2027',
+      year: '2025 - 2028',
       title: 'BCA',
       company: 'Savitribai Phule Pune University',
       desc: 'College: NACAS AHILYANAGAR. Focused on modern web technologies, full-stack development, and core CS fundamentals.'
     },
     {
       year: '2025',
-      title: 'Full Stack Web Development',
-      company: 'Geeks for Geeks',
+      title: '30 DAYS Full Stack Web Bootcamp Development',
+      company: 'PLATFORM - GEEKS FOR GEEKS',
       desc: 'Intensive training on MERN Stack (MongoDB, Express, React, Node.js) and modern web architecture.'
     }
   ];
@@ -923,7 +1156,7 @@ const Resume = () => {
             </div>
           </div>
 
-          <motion.div variants={itemVariants} className="flex flex-col justify-center items-center glass p-8 md:p-12 rounded-3xl text-center relative overflow-hidden group">
+          <motion.div variants={itemVariants} className="glass p-8 md:p-12 rounded-3xl text-center relative overflow-hidden group">
             {/* Subtle Resume Preview Background */}
             <div className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none">
               <img 
@@ -944,15 +1177,25 @@ const Resume = () => {
                 Click below to view or download my professional resume. It contains detailed information about my technical skills and project experience.
               </p>
               
-              <div className="relative group/btn">
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-accent to-neon-pink rounded-2xl blur opacity-25 group-hover/btn:opacity-75 transition duration-1000 group-hover/btn:duration-200"></div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative group/btn">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-accent to-neon-pink rounded-2xl blur opacity-25 group-hover/btn:opacity-75 transition duration-1000 group-hover/btn:duration-200"></div>
+                  <a 
+                    href="https://ibb.co/fV2sm2YB" 
+                    target="_blank"
+                    rel="noreferrer"
+                    className="relative btn-primary flex items-center gap-2 px-8 py-4 rounded-2xl"
+                  >
+                    View Resume <ExternalLink size={18} />
+                  </a>
+                </div>
+                
                 <a 
-                  href="https://ibb.co/fV2sm2YB" 
-                  target="_blank"
-                  rel="noreferrer"
-                  className="relative btn-primary flex items-center gap-2 px-12 py-4 rounded-2xl"
+                  href="https://i.ibb.co/3Q5mT62/IMG-20260225-224506.jpg" 
+                  download="Suraj_Resume.jpg"
+                  className="px-8 py-4 rounded-2xl border border-purple-accent/30 text-text-primary font-semibold hover:bg-purple-accent/10 transition-all flex items-center gap-2"
                 >
-                  Download Resume <Download size={18} />
+                  Download <Download size={18} />
                 </a>
               </div>
               
@@ -1005,22 +1248,46 @@ const Contact = () => {
           </motion.div>
 
           <motion.div variants={itemVariants} className="glass p-8 rounded-3xl">
-            <form className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+            <form 
+              action="https://formspree.io/f/xpwqzvda" 
+              method="POST"
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-text-secondary">Name</label>
-                  <input type="text" className="w-full bg-white/5 border border-border-subtle rounded-xl px-4 py-3 focus:border-purple-accent outline-none transition-all" placeholder="John Doe" />
+                  <input 
+                    name="name"
+                    required
+                    type="text" 
+                    className="w-full bg-white/5 border border-border-subtle rounded-xl px-4 py-3 focus:border-purple-accent outline-none transition-all" 
+                    placeholder="John Doe" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-text-secondary">Email</label>
-                  <input type="email" className="w-full bg-white/5 border border-border-subtle rounded-xl px-4 py-3 focus:border-purple-accent outline-none transition-all" placeholder="john@example.com" />
+                  <input 
+                    name="email"
+                    required
+                    type="email" 
+                    className="w-full bg-white/5 border border-border-subtle rounded-xl px-4 py-3 focus:border-purple-accent outline-none transition-all" 
+                    placeholder="john@example.com" 
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-text-secondary">Message</label>
-                <textarea rows={4} className="w-full bg-white/5 border border-border-subtle rounded-xl px-4 py-3 focus:border-purple-accent outline-none transition-all" placeholder="Your message here..."></textarea>
+                <textarea 
+                  name="message"
+                  required
+                  rows={4} 
+                  className="w-full bg-white/5 border border-border-subtle rounded-xl px-4 py-3 focus:border-purple-accent outline-none transition-all" 
+                  placeholder="Your message here..."
+                ></textarea>
               </div>
-              <button type="submit" className="btn-primary w-full">Send Message</button>
+              <button type="submit" className="btn-primary w-full group flex items-center justify-center gap-2">
+                Send Message <Mail size={18} className="group-hover:translate-x-1 transition-transform" />
+              </button>
             </form>
           </motion.div>
         </div>
@@ -1039,7 +1306,7 @@ const Footer = () => {
         </div>
         
         <p className="text-text-secondary text-sm">
-          © 2025 Suraj. All rights reserved.
+          © 2026 Suraj. All rights reserved.
         </p>
 
         <div className="flex gap-6">
@@ -1083,15 +1350,22 @@ export default function App() {
 
   return (
     <div className="bg-bg-primary min-h-screen selection:bg-purple-accent/30 selection:text-white transition-colors duration-300">
+      <CustomCursor />
+      <ScrollProgress />
+      <Background theme={theme} />
       <Navbar theme={theme} toggleTheme={toggleTheme} />
-      <main>
+      <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <Hero />
         <About theme={theme} />
         <Skills theme={theme} />
         <Projects />
         <Resume />
         <Contact />
-      </main>
+      </motion.main>
       <Footer />
     </div>
   );
