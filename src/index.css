@@ -74,40 +74,6 @@
   border-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Custom Cursor Styles */
-.custom-cursor {
-  width: 20px;
-  height: 20px;
-  background: white;
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  mix-blend-mode: difference;
-  transition: transform 0.15s ease-out, width 0.3s ease, height 0.3s ease;
-}
-
-.custom-cursor-ring {
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9998;
-  transition: transform 0.2s ease-out, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
-}
-
-.cursor-active .custom-cursor {
-  transform: scale(1.5);
-  background: var(--color-purple-accent);
-}
-
-.cursor-active .custom-cursor-ring {
-  transform: scale(1.5);
-  border-color: var(--color-purple-accent);
-}
-
 /* Scroll Progress Bar */
 .scroll-progress {
   position: fixed;

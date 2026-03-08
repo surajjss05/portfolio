@@ -25,60 +25,6 @@ import {
 
 // --- Components ---
 
-const CustomCursor = () => {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === 'BUTTON' || 
-        target.tagName === 'A' || 
-        target.closest('button') || 
-        target.closest('a') ||
-        target.classList.contains('cursor-pointer')
-      ) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseover', handleMouseOver);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseover', handleMouseOver);
-    };
-  }, []);
-
-  return (
-    <div className={`hidden lg:block ${isHovering ? 'cursor-active' : ''}`}>
-      <div 
-        className="custom-cursor"
-        style={{ 
-          left: `${mousePos.x}px`, 
-          top: `${mousePos.y}px`,
-          transform: `translate(-50%, -50%) ${isHovering ? 'scale(1.5)' : 'scale(1)'}`
-        }}
-      />
-      <div 
-        className="custom-cursor-ring"
-        style={{ 
-          left: `${mousePos.x}px`, 
-          top: `${mousePos.y}px`,
-          transform: `translate(-50%, -50%) ${isHovering ? 'scale(1.2)' : 'scale(1)'}`
-        }}
-      />
-    </div>
-  );
-};
-
 const ScrollProgress = () => {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -1350,7 +1296,6 @@ export default function App() {
 
   return (
     <div className="bg-bg-primary min-h-screen selection:bg-purple-accent/30 selection:text-white transition-colors duration-300">
-      <CustomCursor />
       <ScrollProgress />
       <Background theme={theme} />
       <Navbar theme={theme} toggleTheme={toggleTheme} />
