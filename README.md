@@ -8,7 +8,7 @@ A modern, responsive, and visually stunning **personal portfolio website** built
 
 ## 📸 Preview
 
-![Portfolio Preview](portfolio_preview.png)
+![Portfolio Preview](Preview.png)
 
 ---
 
