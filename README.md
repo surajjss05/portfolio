@@ -95,7 +95,7 @@ portfolio/
 
 This portfolio is deployed using **Netlify** for fast and reliable hosting.
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/your-badge-id/deploy-status)](https://s3portfoli.netlify.app/)
+[![Netlify Status](https://app.netlify.com/projects/s3portfoli/overview)](https://s3portfoli.netlify.app/)
 
 To deploy your own version:
 1. Push your code to GitHub
